@@ -10,6 +10,7 @@ import {
   ArrowLeftRight,
   ClipboardCheck,
   TriangleAlert,
+  ShoppingCart,
   Boxes,
   type LucideIcon,
 } from "lucide-react";
@@ -27,6 +28,7 @@ const groups: NavGroup[] = [
     title: "Operação",
     items: [
       { href: "/movimentacoes", label: "Movimentações", icon: ArrowLeftRight },
+      { href: "/pedidos", label: "Pedidos", icon: ShoppingCart },
       { href: "/inventario", label: "Inventário", icon: ClipboardCheck },
       { href: "/alertas", label: "Alertas", icon: TriangleAlert },
     ],

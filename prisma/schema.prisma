@@ -40,6 +40,12 @@ enum InventoryStatus {
   FECHADO
 }
 
+enum OrderStatus {
+  ABERTO // criado, em separação
+  EXPEDIDO // baixa de estoque efetuada
+  CANCELADO // cancelado sem baixa
+}
+
 // ─────────────────────────────────────────────
 // Usuários e perfis (auth fica para etapa futura)
 // ─────────────────────────────────────────────
@@ -54,6 +60,7 @@ model User {
 
   movements   Movement[]
   inventories Inventory[]
+  orders      Order[]
 }
 
 // ─────────────────────────────────────────────
@@ -96,6 +103,7 @@ model Product {
   movements      Movement[]
   alerts         Alert[]
   inventoryItems InventoryItem[]
+  orderItems     OrderItem[]
 
   @@index([name])
   @@index([categoryId])
@@ -132,6 +140,7 @@ model Position {
   movementsFrom  Movement[]      @relation("MovementFrom")
   movementsTo    Movement[]      @relation("MovementTo")
   inventoryItems InventoryItem[]
+  orderItems     OrderItem[]
 
   @@unique([aisleId, code])
 }
@@ -235,4 +244,37 @@ model InventoryItem {
   position  Position? @relation(fields: [positionId], references: [id])
 
   @@index([inventoryId])
+}
+
+// ─────────────────────────────────────────────
+// Pedidos de expedição (Fluxo 2 — separação/picking)
+// ─────────────────────────────────────────────
+
+model Order {
+  id          String      @id @default(cuid())
+  status      OrderStatus @default(ABERTO)
+  note        String?
+  createdAt   DateTime    @default(now())
+  shippedAt   DateTime?
+  createdById String?
+  createdBy   User?       @relation(fields: [createdById], references: [id])
+
+  items OrderItem[]
+
+  @@index([status])
+}
+
+model OrderItem {
+  id                   String  @id @default(cuid())
+  orderId              String
+  productId            String
+  quantity             Int // quantidade pedida
+  pickedFromPositionId String? // posição escolhida na coleta
+  picked               Boolean @default(false)
+
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product    Product   @relation(fields: [productId], references: [id])
+  pickedFrom Position? @relation(fields: [pickedFromPositionId], references: [id])
+
+  @@index([orderId])
 }

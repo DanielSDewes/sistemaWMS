@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +56,14 @@ export function ProductsTable({ products, onEdit, onDelete }: Props) {
           {products.map((p) => (
             <TableRow key={p.id}>
               <TableCell className="font-mono text-xs">{p.sku}</TableCell>
-              <TableCell className="font-medium">{p.name}</TableCell>
+              <TableCell className="font-medium">
+                <Link
+                  href={`/produtos/${p.id}`}
+                  className="hover:text-primary hover:underline"
+                >
+                  {p.name}
+                </Link>
+              </TableCell>
               <TableCell>
                 {p.category ? (
                   <Badge variant="secondary">{p.category.name}</Badge>

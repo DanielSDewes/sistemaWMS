@@ -49,8 +49,14 @@ export async function getProduct(id: string) {
     where: { id },
     include: {
       category: true,
-      suppliers: true,
-      stockItems: { include: { position: true } },
+      suppliers: { select: { id: true, name: true } },
+      // Distribuição por posição com o endereço hierárquico (Área/Corredor/Posição),
+      // só onde há saldo, ordenada para leitura.
+      stockItems: {
+        where: { quantity: { gt: 0 } },
+        orderBy: { quantity: "desc" },
+        include: { position: { include: { aisle: { include: { area: true } } } } },
+      },
     },
   });
 }

@@ -6,17 +6,32 @@ export type MovementListItem = Awaited<
   ReturnType<typeof listMovements>
 >[number];
 
+// Forma comum do histórico (produto, posições com endereço, fornecedor) —
+// compartilhada pelo histórico global e pelo histórico de um produto, para
+// que a mesma `MovementsTable` renderize ambos.
+const movementInclude = {
+  product: { select: { id: true, name: true, sku: true } },
+  fromPosition: { include: { aisle: { include: { area: true } } } },
+  toPosition: { include: { aisle: { include: { area: true } } } },
+  supplier: { select: { id: true, name: true } },
+} as const;
+
 // Histórico: movimentações mais recentes primeiro, com produto, posições e fornecedor.
 export async function listMovements(limit = 100) {
   return db.movement.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
-    include: {
-      product: { select: { id: true, name: true, sku: true } },
-      fromPosition: { include: { aisle: { include: { area: true } } } },
-      toPosition: { include: { aisle: { include: { area: true } } } },
-      supplier: { select: { id: true, name: true } },
-    },
+    include: movementInclude,
+  });
+}
+
+// Histórico de um produto específico (mesma forma de `listMovements`).
+export async function listMovementsByProduct(productId: string, limit = 20) {
+  return db.movement.findMany({
+    where: { productId },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: movementInclude,
   });
 }
 

@@ -1,0 +1,53 @@
+import { db } from "@/lib/db";
+
+// Leituras do módulo de movimentação — consumidas por Server Components.
+
+export type MovementListItem = Awaited<
+  ReturnType<typeof listMovements>
+>[number];
+
+// Histórico: movimentações mais recentes primeiro, com produto, posições e fornecedor.
+export async function listMovements(limit = 100) {
+  return db.movement.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: {
+      product: { select: { id: true, name: true, sku: true } },
+      fromPosition: { include: { aisle: { include: { area: true } } } },
+      toPosition: { include: { aisle: { include: { area: true } } } },
+      supplier: { select: { id: true, name: true } },
+    },
+  });
+}
+
+export type PositionOption = {
+  id: string;
+  label: string; // "ÁREA / CORREDOR / POSIÇÃO"
+};
+
+// Todas as posições com rótulo hierárquico (para o seletor de destino).
+export async function listPositionOptions(): Promise<PositionOption[]> {
+  const positions = await db.position.findMany({
+    orderBy: { code: "asc" },
+    include: { aisle: { include: { area: true } } },
+  });
+  return positions.map((p) => ({
+    id: p.id,
+    label: `${p.aisle.area.code} / ${p.aisle.code} / ${p.code}`,
+  }));
+}
+
+export type StockEntry = {
+  productId: string;
+  positionId: string;
+  quantity: number;
+};
+
+// Saldos com quantidade > 0 (para o seletor de origem filtrar por produto).
+export async function listStockWithBalance(): Promise<StockEntry[]> {
+  const items = await db.stockItem.findMany({
+    where: { quantity: { gt: 0 } },
+    select: { productId: true, positionId: true, quantity: true },
+  });
+  return items;
+}

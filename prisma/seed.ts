@@ -1,8 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { PrismaClient } = require("../src/generated/prisma");
+import "dotenv/config";
 import bcrypt from "bcryptjs";
-
-const db = new PrismaClient();
 
 async function main() {
   const email = process.env.SEED_ADMIN_EMAIL;
@@ -15,9 +12,13 @@ async function main() {
     process.exit(1);
   }
 
+  // Importa o PrismaClient após o dotenv ter carregado o DATABASE_URL
+  const { db } = await import("../src/lib/db");
+
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) {
     console.log(`ℹ️  Usuário ${email} já existe. Nenhuma ação necessária.`);
+    await db.$disconnect();
     return;
   }
 
@@ -27,11 +28,10 @@ async function main() {
   });
 
   console.log(`✅  Usuário GESTOR criado: ${user.email} (id: ${user.id})`);
+  await db.$disconnect();
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => db.$disconnect());
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

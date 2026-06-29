@@ -6,10 +6,10 @@ async function main() {
   const password = process.env.SEED_ADMIN_PASSWORD;
 
   if (!email || !password) {
-    console.error(
-      "❌  Defina SEED_ADMIN_EMAIL e SEED_ADMIN_PASSWORD no .env antes de rodar o seed.",
+    console.warn(
+      "⚠️   SEED_ADMIN_EMAIL ou SEED_ADMIN_PASSWORD não definidos — seed ignorado.",
     );
-    process.exit(1);
+    return;
   }
 
   // Importa o PrismaClient após o dotenv ter carregado o DATABASE_URL

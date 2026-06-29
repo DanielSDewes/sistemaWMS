@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -11,7 +12,6 @@ import {
   ClipboardCheck,
   TriangleAlert,
   ShoppingCart,
-  Boxes,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -49,9 +49,15 @@ export function AppSidebar() {
   return (
     <aside className="flex h-full w-60 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
       <div className="flex h-14 items-center gap-2.5 border-b border-sidebar-border px-4">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-          <Boxes className="size-4" />
-        </span>
+        <Image
+          src="/logo.svg"
+          alt="Logo do Sistema WMS"
+          width={32}
+          height={32}
+          priority
+          unoptimized
+          className="size-8 shrink-0"
+        />
         <div className="flex flex-col leading-none">
           <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
             WMS

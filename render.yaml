@@ -1,0 +1,37 @@
+# Render Blueprint — Sistema WMS
+# Sobe o app Next.js + um PostgreSQL gerenciado de uma vez só.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Como usar:
+#   1. Faça push deste arquivo para o GitHub.
+#   2. No Render: New > Blueprint > selecione o repositório.
+#   3. O Render cria o banco e o web service e injeta a DATABASE_URL sozinho.
+#
+# Notas:
+#   - As migrations rodam no startCommand (runtime), porque o build do Render
+#     NÃO tem acesso ao banco. Todas as páginas são `force-dynamic`, então o
+#     `next build` não consulta o banco — o build passa sem DB.
+#   - `prisma migrate deploy` é idempotente: aplica só o que falta a cada deploy.
+
+databases:
+  - name: wms-db
+    databaseName: wms
+    user: wms
+    plan: free # 90 dias no plano grátis; depois troque para basic-256mb (ou superior)
+    region: oregon # latência menor do Brasil: troque para "virginia" (mude TAMBÉM no service)
+
+services:
+  - type: web
+    name: sistema-wms
+    runtime: node
+    plan: free # dorme após 15 min de inatividade; troque para "starter" para ficar sempre on
+    region: oregon # mantenha igual ao region do banco
+    autoDeploy: true
+    buildCommand: npm ci && npx prisma generate && npx next build
+    startCommand: npx prisma migrate deploy && npm run start
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: wms-db
+          property: connectionString

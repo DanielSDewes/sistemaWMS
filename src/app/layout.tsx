@@ -32,10 +32,14 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR" className="h-full antialiased">
       <body className="min-h-full">
-        <div className="flex h-screen">
-          <AppSidebar user={session} unreadAlerts={unreadAlerts} />
-          <main className="flex-1 overflow-y-auto bg-muted/30 p-6">{children}</main>
-        </div>
+        {session ? (
+          <div className="flex h-screen">
+            <AppSidebar user={session} unreadAlerts={unreadAlerts} />
+            <main className="flex-1 overflow-y-auto bg-muted/30 p-6">{children}</main>
+          </div>
+        ) : (
+          children
+        )}
         <Toaster />
       </body>
     </html>
